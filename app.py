@@ -10,7 +10,7 @@ from aiogram.types import FSInputFile, InlineKeyboardMarkup, InlineKeyboardButto
 
 from keep_alive import keep_alive  # 👈 import keep_alive
 
-API_TOKEN = "YOUR_API_TOKEN_HERE"  # ⚠️ replace with your token
+API_TOKEN = "7992205107:AAEEDo71Ymk6r9DFyYrTCDSHznPziXaHnXM"  # ⚠️ replace with your token
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
