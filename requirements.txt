@@ -1,5 +1,4 @@
-aiogram
-aiohttp
+requests
 pandas
 openpyxl
 flask
