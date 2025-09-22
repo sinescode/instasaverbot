@@ -1,4 +1,6 @@
+Flask
+Flask-SQLAlchemy
+APScheduler
 requests
-pandas
-openpyxl
-flask
+psycopg2-binary
+python-dateutil
