@@ -1,18 +1,15 @@
 from flask import Flask, render_template, jsonify, send_file, request
 from flask_sqlalchemy import SQLAlchemy
-from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 import json
 import os
 from datetime import datetime
 import io
-import atexit
 
 app = Flask(__name__)
 
 # Database config
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    'DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -22,9 +19,9 @@ class LotteryResult(db.Model):
     __tablename__ = 'lottery_results'
     
     id = db.Column(db.Integer, primary_key=True)
-    issue_number = db.Column(db.String(30), unique=True, nullable=False)  # increased from 20 → 30
+    issue_number = db.Column(db.String(30), unique=True, nullable=False)
     number = db.Column(db.String(10), nullable=False)
-    color = db.Column(db.String(50), nullable=False)  # increased from 10 → 50
+    color = db.Column(db.String(50), nullable=False)
     premium = db.Column(db.Boolean, default=False)
     sum_value = db.Column(db.Integer)
     size = db.Column(db.String(10))
@@ -89,35 +86,14 @@ def save_lottery_data(data):
             db.session.rollback()
             print(f"Error saving data: {e}")
 
+@app.route('/update')
 def update_lottery_data():
-    """Task to fetch and update lottery data every 30 seconds"""
-    with app.app_context():
-        print(f"Fetching new data at {datetime.now()}")
-        data = fetch_lottery_data()
-        if data:
-            save_lottery_data(data)
-
-# Initialize scheduler
-scheduler = BackgroundScheduler()
-
-def initialize():
-    """Initialize the application"""
-    # Create database tables
-    db.create_all()
-    
-    # Fetch initial data
-    print("Fetching initial data...")
+    """Manually trigger data fetch and update"""
     data = fetch_lottery_data()
     if data:
         save_lottery_data(data)
-    
-    # Start scheduler for periodic updates
-    scheduler.add_job(func=update_lottery_data, trigger="interval", seconds=30)
-    scheduler.start()
-    print("Scheduler started")
-    
-    # Register shutdown function
-    atexit.register(lambda: scheduler.shutdown())
+        return jsonify({"status": "success", "message": "Data updated"}), 200
+    return jsonify({"status": "error", "message": "Failed to fetch data"}), 500
 
 @app.route('/')
 def index():
@@ -183,8 +159,11 @@ def download_json():
     )
 
 if __name__ == '__main__':
-    with app.app_context():
-        initialize()
+    with app.app_context(): 
+        db.create_all()
+        print("Fetching initial data...")
+        data = fetch_lottery_data()
+        if data:
+            save_lottery_data(data)
     app.run(host="0.0.0.0", port=10000, debug=True)
-    
     
